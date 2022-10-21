@@ -1,0 +1,16 @@
+{
+  "name": "sls-devagram-typescript",
+  "version": "1.0.0",
+  "description": "Arquitetura Serveless Devaria 2022",
+  "main": "handler.js",
+  "private": "true",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matheus Marinho",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-plugin-typescript": "^2.1.4",
+    "typescript": "^4.8.4"
+  }
+}
