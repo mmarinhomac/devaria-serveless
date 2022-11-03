@@ -12,11 +12,14 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.108",
     "aws-sdk": "^2.1241.0",
+    "serverless-apigw-binary": "^0.4.4",
     "serverless-plugin-typescript": "^2.1.4",
     "typescript": "^4.8.4"
   },
   "dependencies": {
     "amazon-cognito-identity-js": "^5.2.12",
-    "dynamoose": "^3.1.0"
+    "aws-multipart-parser": "^0.2.1",
+    "dynamoose": "^3.1.0",
+    "uuid": "^9.0.0"
   }
 }

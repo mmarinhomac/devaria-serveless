@@ -1,6 +1,12 @@
 import { Handler, APIGatewayEvent } from "aws-lambda";
+import { parse } from "aws-multipart-parser";
+import { FileData } from "aws-multipart-parser/dist/models";
 
-import { passwordRegex, emailRegex } from "../constants/regex";
+import {
+  passwordRegex,
+  emailRegex,
+  imageAllowedExtensions,
+} from "../constants/regex";
 import {
   DefaultJsonResponse,
   formatDefaultResponse,
@@ -10,12 +16,14 @@ import { ConfirmEmailRequest } from "../types/auth/ConfirmEmailRequest";
 import { CognitoServices } from "../services/cognitoServices";
 import { UserModel } from "../models/UserModel";
 import { User } from "../types/models/User";
+import { S3Services } from "../services/s3Services";
 
 export const register: Handler = async (
   event: APIGatewayEvent
 ): Promise<DefaultJsonResponse> => {
   try {
-    const { USER_POOL_ID, USER_POOL_CLIENT_ID, USER_TABLE } = process.env;
+    const { USER_POOL_ID, USER_POOL_CLIENT_ID, USER_TABLE, AVATAR_BUCKET } =
+      process.env;
 
     if (!USER_POOL_ID || !USER_POOL_CLIENT_ID) {
       return formatDefaultResponse(500, "Cognito Environments não encontradas");
@@ -28,13 +36,30 @@ export const register: Handler = async (
       );
     }
 
+    if (!AVATAR_BUCKET) {
+      return formatDefaultResponse(
+        500,
+        "S3Bucket Environments não encontradas"
+      );
+    }
+
     if (!event.body) {
       return formatDefaultResponse(400, "Parâmetros de entrada não informados");
     }
 
-    const request = JSON.parse(event.body) as UserRegisterRequest;
-    const { email, password, name } = request;
+    const formData = parse(event, true);
+    const file = formData.file as FileData;
 
+    const email = formData.email as string;
+    const name = formData.name as string;
+    const password = formData.password as string;
+
+    if (file && !imageAllowedExtensions.exec(file.filename)) {
+      return formatDefaultResponse(
+        400,
+        "Imagem do avatar deve ser somente das seguintes extensões: .jpeg/.jpg/.png/.gif "
+      );
+    }
     if (!email || !email.match(emailRegex)) {
       return formatDefaultResponse(400, "Email inválido");
     }
@@ -53,9 +78,15 @@ export const register: Handler = async (
       USER_POOL_CLIENT_ID
     ).signUp(email, password);
 
+    let key = "";
+    if (file) {
+      key = await new S3Services().saveImage(AVATAR_BUCKET, "avatar", file);
+    }
+
     const user = {
       name,
       email,
+      avatar: key,
       cognitoId: cognitoUser.userSub,
     } as User;
 
