@@ -8,16 +8,26 @@ import {
 import { UserRegisterRequest } from "../types/auth/UserRegisterRequest";
 import { ConfirmEmailRequest } from "../types/auth/ConfirmEmailRequest";
 import { CognitoServices } from "../services/cognitoServices";
+import { UserModel } from "../models/UserModel";
+import { User } from "../types/models/User";
 
 export const register: Handler = async (
   event: APIGatewayEvent
 ): Promise<DefaultJsonResponse> => {
   try {
-    const { USER_POOL_ID, USER_POOL_CLIENT_ID } = process.env;
+    const { USER_POOL_ID, USER_POOL_CLIENT_ID, USER_TABLE } = process.env;
 
     if (!USER_POOL_ID || !USER_POOL_CLIENT_ID) {
       return formatDefaultResponse(500, "Cognito Environments não encontradas");
     }
+
+    if (!USER_TABLE) {
+      return formatDefaultResponse(
+        500,
+        "DynamoDB Environments não encontradas"
+      );
+    }
+
     if (!event.body) {
       return formatDefaultResponse(400, "Parâmetros de entrada não informados");
     }
@@ -38,10 +48,19 @@ export const register: Handler = async (
       return formatDefaultResponse(400, "Nome inválido");
     }
 
-    await new CognitoServices(USER_POOL_ID, USER_POOL_CLIENT_ID).signUp(
+    const cognitoUser = await new CognitoServices(
+      USER_POOL_ID,
+      USER_POOL_CLIENT_ID
+    ).signUp(email, password);
+
+    const user = {
+      name,
       email,
-      password
-    );
+      cognitoId: cognitoUser.userSub,
+    } as User;
+
+    await UserModel.create(user);
+
     return formatDefaultResponse(
       200,
       "Usuario cadastrado com sucesso, verifique seu email para confirmar o codigo!"
