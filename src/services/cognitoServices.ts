@@ -1,4 +1,8 @@
-import { CognitoUser, CognitoUserPool } from "amazon-cognito-identity-js";
+import {
+  AuthenticationDetails,
+  CognitoUser,
+  CognitoUserPool,
+} from "amazon-cognito-identity-js";
 
 export class CognitoServices {
   constructor(private userPoolId: string, private userPoolClient: string) {}
@@ -55,7 +59,7 @@ export class CognitoServices {
     });
   };
 
-  public async forgotPassword(email: string): Promise<string> {
+  public forgotPassword = (email: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       try {
         const userPool = new CognitoUserPool(this.poolData);
@@ -78,13 +82,13 @@ export class CognitoServices {
         reject(error);
       }
     });
-  }
+  };
 
-  public async confirmPassword(
+  public confirmPassword = (
     email: string,
     password: string,
     verificationCode: string
-  ): Promise<string> {
+  ): Promise<string> => {
     return new Promise((resolve, reject) => {
       try {
         const userPool = new CognitoUserPool(this.poolData);
@@ -107,5 +111,45 @@ export class CognitoServices {
         reject(error);
       }
     });
-  }
+  };
+
+  public login = (email: string, password: string): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const authenticationData = {
+          Username: email,
+          Password: password,
+        };
+        const authenticationDetails = new AuthenticationDetails(
+          authenticationData
+        );
+
+        const userPool = new CognitoUserPool(this.poolData);
+        const userData = {
+          Username: email,
+          Pool: userPool,
+        };
+
+        const user = new CognitoUser(userData);
+
+        user.authenticateUser(authenticationDetails, {
+          onSuccess: (result) => {
+            const accessToken = result.getAccessToken().getJwtToken();
+            const refreshToken = result.getRefreshToken().getToken();
+
+            resolve({
+              email,
+              token: accessToken,
+              refreshToken,
+            });
+          },
+          onFailure: (err) => {
+            reject(err.message);
+          },
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
 }

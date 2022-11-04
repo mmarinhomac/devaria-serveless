@@ -8,7 +8,7 @@ export type DefaultJsonResponse = {
 
 export const formatDefaultResponse = (
   statusCode: number,
-  message: string | undefined,
+  message: string | undefined | null,
   response?: Record<string, unknown>
 ): DefaultJsonResponse => {
   const defaultMessage: DefaultResponseMessage = {};
