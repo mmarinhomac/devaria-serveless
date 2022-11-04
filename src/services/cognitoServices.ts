@@ -54,4 +54,58 @@ export class CognitoServices {
       }
     });
   };
+
+  public async forgotPassword(email: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      try {
+        const userPool = new CognitoUserPool(this.poolData);
+        const userData = {
+          Username: email,
+          Pool: userPool,
+        };
+
+        const cognitoUser = new CognitoUser(userData);
+
+        cognitoUser.forgotPassword({
+          onSuccess(data) {
+            resolve(data);
+          },
+          onFailure(err) {
+            reject(err.message);
+          },
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  public async confirmPassword(
+    email: string,
+    password: string,
+    verificationCode: string
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      try {
+        const userPool = new CognitoUserPool(this.poolData);
+        const userData = {
+          Username: email,
+          Pool: userPool,
+        };
+
+        const cognitoUser = new CognitoUser(userData);
+
+        cognitoUser.confirmPassword(verificationCode, password, {
+          onSuccess() {
+            resolve("Senha alterada com sucesso!");
+          },
+          onFailure(err) {
+            reject(err.message);
+          },
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }

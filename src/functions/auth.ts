@@ -17,6 +17,7 @@ import { CognitoServices } from "../services/cognitoServices";
 import { UserModel } from "../models/UserModel";
 import { User } from "../types/models/User";
 import { S3Services } from "../services/s3Services";
+import { ChangePasswordRequest } from "../types/auth/ChangePasswordRequest";
 
 export const register: Handler = async (
   event: APIGatewayEvent
@@ -134,5 +135,86 @@ export const confirmEmail: Handler = async (
   } catch (error) {
     console.log("Error on confirm user:", error);
     return formatDefaultResponse(500, "Erro ao confirmar usuário!");
+  }
+};
+
+export const forgotPassword: Handler = async (
+  event: APIGatewayEvent
+): Promise<DefaultJsonResponse> => {
+  try {
+    const { USER_POOL_ID, USER_POOL_CLIENT_ID } = process.env;
+
+    if (!USER_POOL_ID || !USER_POOL_CLIENT_ID) {
+      return formatDefaultResponse(500, "Cognito Environments não encontradas");
+    }
+    if (!event.body) {
+      return formatDefaultResponse(400, "Parâmetros de entrada não informados");
+    }
+
+    const request = JSON.parse(event.body);
+    const { email } = request;
+
+    if (!email || !email.match(emailRegex)) {
+      return formatDefaultResponse(400, "Email inválido");
+    }
+
+    await new CognitoServices(USER_POOL_ID, USER_POOL_CLIENT_ID).forgotPassword(
+      email
+    );
+    return formatDefaultResponse(
+      200,
+      "Enviamos um email para cadastro de nova senha!"
+    );
+  } catch (error) {
+    console.log("Error on confirm user:", error);
+    return formatDefaultResponse(
+      500,
+      "Erro ao solicitar email de esqueci a senha:",
+      error
+    );
+  }
+};
+
+export const changePassword: Handler = async (
+  event: APIGatewayEvent
+): Promise<DefaultJsonResponse> => {
+  try {
+    const { USER_POOL_ID, USER_POOL_CLIENT_ID } = process.env;
+
+    if (!USER_POOL_ID || !USER_POOL_CLIENT_ID) {
+      return formatDefaultResponse(500, "Cognito Environments não encontradas");
+    }
+    if (!event.body) {
+      return formatDefaultResponse(400, "Parâmetros de entrada não informados");
+    }
+
+    const request = JSON.parse(event.body) as ChangePasswordRequest;
+    const { email, verificationCode, password } = request;
+
+    if (!email || !email.match(emailRegex)) {
+      return formatDefaultResponse(400, "Email inválido");
+    }
+    if (!verificationCode || verificationCode.length !== 6) {
+      return formatDefaultResponse(400, "Código de confirmação inválido");
+    }
+    if (!password || !password.match(passwordRegex)) {
+      return formatDefaultResponse(
+        400,
+        "Senha inválida, senha deve conter pelo menos um caractér maiúsculo, minúsculo, numérico e especial, além de ter pelo menos oito dígitos."
+      );
+    }
+
+    const result = await new CognitoServices(
+      USER_POOL_ID,
+      USER_POOL_CLIENT_ID
+    ).confirmPassword(email, password, verificationCode);
+    return formatDefaultResponse(200, result);
+  } catch (error) {
+    console.log("Error on confirm user:", error);
+    return formatDefaultResponse(
+      500,
+      "Erro ao confirmar email do usuário:",
+      error
+    );
   }
 };
