@@ -2,8 +2,8 @@ service: sls-devagram-typescript
 frameworkVersion: '3'
 
 custom:
-  userPoolId: 'us-east-1_VrI3XRYMb'
-  userPoolClientId: '1g2cpmn0a31at0srh7nk4phsi4'
+  userPoolId: 'us-east-1_HKoQk0hrM'
+  userPoolClientId: '6mt5mecl4i8cji5rshkp8d8icg'
   userTableName: 'users-table-${self:provider.stage}'
   avatarBucket: '${self:service}-${self:provider.stage}-devagram-avatars'
   apigwBinary:
@@ -28,6 +28,20 @@ provider:
             - dynamodb:*
           Resource:
             - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.userTableName}"
+  httpApi:
+    authorizers:
+      serviceAuthorizer:
+        identitySource: $request.header.Authorization
+        issuerUrl:
+          Fn::Join:
+          - ''
+          - 
+            - 'https://cognito-idp.'
+            - '${self:provider.region}'
+            - '.amazonaws.com/'
+            - Ref: CognitoUserPool
+        audience:
+          - Ref: CognitoUserPoolClient
 
 plugins:
   - serverless-plugin-typescript
@@ -69,6 +83,13 @@ functions:
           path: login
           method: post
           cors: true
+  me:
+    handler: src/functions/user.me
+    events:
+      - httpApi:
+          path: /me
+          method: get
+          authorizer: serviceAuthorizer
 
 resources:
   Resources:
@@ -91,7 +112,7 @@ resources:
             RequireNumbers: true
             RequireSymbols: true
             RequireUppercase: true
-    CognitoUserClient:
+    CognitoUserPoolClient:
       Type: AWS::Cognito::UserPoolClient
       Properties:
         ClientName: ${self:service}-${self:provider.stage}-user-pool-client
