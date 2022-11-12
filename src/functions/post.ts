@@ -120,3 +120,44 @@ export const toggleLike: Handler = async (
     );
   }
 };
+
+export const comment: Handler = async (
+  event: any
+): Promise<DefaultJsonResponse> => {
+  try {
+    const { error } = validateEnvs(["POST_TABLE"]);
+    if (error) {
+      return formatDefaultResponse(500, error);
+    }
+
+    const userId = getUserIdFromEvent(event);
+    if (!userId) {
+      return formatDefaultResponse(400, "Usuário não encontrado");
+    }
+
+    const { postId } = event.pathParameters;
+    if (!postId) {
+      return formatDefaultResponse(400, "Parâmetros de entrada não informados");
+    }
+
+    const post = await PostModel.get({ id: postId.toString() });
+    if (!post) {
+      return formatDefaultResponse(400, "Publicação não encontrada");
+    }
+
+    const request = JSON.parse(event.body);
+    const { comment } = request;
+
+    if (!comment || comment.length < 2) {
+      return formatDefaultResponse(400, "Comentário inválido");
+    }
+
+    const obj = { userId, comment, date: moment().format() };
+    post.coments.push(obj);
+    await PostModel.update(post);
+    return formatDefaultResponse(200, "Comentário adicionado com sucesso");
+  } catch (e: any) {
+    console.log("Error on post coment: ", e);
+    return formatDefaultResponse(500, "Erro ao adicionar comentário: " + e);
+  }
+};
