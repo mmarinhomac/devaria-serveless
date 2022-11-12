@@ -99,7 +99,6 @@ export const update: Handler = async (
     }
 
     await UserModel.update(user);
-    console.log("Usuário atualizado:", user);
     return formatDefaultResponse(200, "Usuario atualizado com sucesso!");
   } catch (e: any) {
     console.log("Error on register user: ", e);
