@@ -2,6 +2,7 @@ import { Handler, APIGatewayEvent } from "aws-lambda";
 
 import { CognitoServices } from "../services/cognitoServices";
 import { LoginRequest } from "../types/login/LoginRequest";
+import { validateEnvs } from "../utils/environmentUtils";
 import {
   DefaultJsonResponse,
   formatDefaultResponse,
@@ -11,11 +12,15 @@ export const handler: Handler = async (
   event: APIGatewayEvent
 ): Promise<DefaultJsonResponse> => {
   try {
-    const { USER_POOL_ID, USER_POOL_CLIENT_ID } = process.env;
+    const { USER_POOL_ID, USER_POOL_CLIENT_ID, error } = validateEnvs([
+      "USER_POOL_ID",
+      "USER_POOL_CLIENT_ID",
+    ]);
 
-    if (!USER_POOL_ID || !USER_POOL_CLIENT_ID) {
-      return formatDefaultResponse(500, "Cognito Environments não encontradas");
+    if (error) {
+      return formatDefaultResponse(500, error);
     }
+
     if (!event.body) {
       return formatDefaultResponse(400, "Parâmetros de entrada não informados");
     }

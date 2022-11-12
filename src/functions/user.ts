@@ -10,14 +10,19 @@ import {
   formatDefaultResponse,
 } from "../utils/formatResponseUtil";
 import { imageAllowedExtensions } from "../constants/regex";
+import { validateEnvs } from "../utils/environmentUtils";
 
 export const me: Handler = async (
   event: APIGatewayEvent
 ): Promise<DefaultJsonResponse> => {
   try {
-    const { USER_TABLE, AVATAR_BUCKET } = process.env;
-    if (!USER_TABLE) {
-      return formatDefaultResponse(500, "Tabela de usuário não informada");
+    const { AVATAR_BUCKET, error } = validateEnvs([
+      "USER_TABLE",
+      "AVATAR_BUCKET",
+    ]);
+
+    if (error) {
+      return formatDefaultResponse(500, error);
     }
 
     if (!AVATAR_BUCKET) {
@@ -49,10 +54,15 @@ export const update: Handler = async (
   event: APIGatewayEvent
 ): Promise<DefaultJsonResponse> => {
   try {
-    const { USER_TABLE, AVATAR_BUCKET } = process.env;
-    if (!USER_TABLE) {
-      return formatDefaultResponse(500, "Tabela de usuário não informada");
+    const { AVATAR_BUCKET, error } = validateEnvs([
+      "USER_TABLE",
+      "AVATAR_BUCKET",
+    ]);
+
+    if (error) {
+      return formatDefaultResponse(500, error);
     }
+
     if (!AVATAR_BUCKET) {
       return formatDefaultResponse(500, "Bucket de avatares não informado");
     }
