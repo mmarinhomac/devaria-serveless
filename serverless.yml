@@ -102,6 +102,20 @@ functions:
           path: /user
           method: put
           authorizer: serviceAuthorizer
+  getUser:
+    handler: src/functions/user.getById
+    events:
+      - httpApi:
+          path: /user/{userId}
+          method: get
+          authorizer: serviceAuthorizer
+  searchUser:
+    handler: src/functions/user.searchUser
+    events:
+      - httpApi:
+          path: /user/search/{filter}
+          method: get
+          authorizer: serviceAuthorizer
   createPost:
     handler: src/functions/post.create
     events:
