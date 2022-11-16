@@ -161,3 +161,30 @@ export const comment: Handler = async (
     return formatDefaultResponse(500, "Erro ao adicionar comentário: " + e);
   }
 };
+
+export const get: Handler = async (
+  event: any
+): Promise<DefaultJsonResponse> => {
+  try {
+    const { POST_BUCKET, error } = validateEnvs(["POST_TABLE", "POST_BUCKET"]);
+    if (error) {
+      return formatDefaultResponse(500, error);
+    }
+
+    const { postId } = event.pathParameters;
+    if (!postId) {
+      return formatDefaultResponse(400, "Parâmetros de entrada não informados");
+    }
+
+    const post = await PostModel.get({ id: postId.toString() });
+    if (post) {
+      const url = await new S3Services().getImageUrl(POST_BUCKET, post.image);
+      post.image = url;
+    }
+
+    return formatDefaultResponse(200, null, post);
+  } catch (e) {
+    console.log("Error on get user data: ", e);
+    return formatDefaultResponse(500, "Erro ao buscar dados do usuário: " + e);
+  }
+};
