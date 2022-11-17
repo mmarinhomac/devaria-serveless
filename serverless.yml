@@ -116,6 +116,13 @@ functions:
           path: /user/search/{filter}
           method: get
           authorizer: serviceAuthorizer
+  toggleFollow:
+    handler: src/functions/follow.toggle
+    events:
+      - httpApi:
+          path: /follow/{followId}
+          method: put
+          authorizer: serviceAuthorizer
   createPost:
     handler: src/functions/post.create
     events:
