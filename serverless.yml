@@ -136,6 +136,13 @@ functions:
           path: /feed/user/{userId}
           method: get
           authorizer: serviceAuthorizer
+  feedHome:
+    handler: src/functions/feed.getHome
+    events:
+      - httpApi:
+          path: /feed
+          method: get
+          authorizer: serviceAuthorizer
   createPost:
     handler: src/functions/post.create
     events:

@@ -61,3 +61,54 @@ export const getByUser: Handler = async (
     return formatDefaultResponse(500, "Erro ao buscar feed do usuário: " + e);
   }
 };
+
+export const getHome: Handler = async (
+  event: any
+): Promise<DefaultJsonResponse> => {
+  try {
+    const { POST_BUCKET, error } = validateEnvs(["USER_TABLE", "POST_BUCKET"]);
+    if (error) {
+      return formatDefaultResponse(500, error);
+    }
+
+    const userId = getUserIdFromEvent(event);
+    const { lastKey } = event.queryStringParameters || "";
+    if (!userId) {
+      return formatDefaultResponse(400, "Parâmetros de entrada não informados");
+    }
+
+    const user = await UserModel.get({ cognitoId: userId });
+    if (!user) {
+      return formatDefaultResponse(400, "Usuário não encontrado");
+    }
+
+    const usersToFeed = user.following;
+    usersToFeed.push(userId);
+    const query = PostModel.scan("userId").in(usersToFeed);
+    if (lastKey) {
+      query.startAt({ id: lastKey });
+    }
+
+    const result = await query.limit(20).exec();
+    let response = {} as DefaultListPaginatedResponse;
+    if (result) {
+      response.count = result.count;
+      response.lastkey = result.lastKey;
+
+      for (const document of result) {
+        if (document && document.image) {
+          const url = await new S3Services().getImageUrl(
+            POST_BUCKET,
+            document.image
+          );
+          document.image = url;
+        }
+      }
+      response.data = result;
+    }
+    return formatDefaultResponse(200, null, response);
+  } catch (e) {
+    console.log("Error on get home feed: ", e);
+    return formatDefaultResponse(500, "Erro ao buscar feed da home: " + e);
+  }
+};
