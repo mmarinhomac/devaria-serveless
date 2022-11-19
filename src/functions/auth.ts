@@ -18,6 +18,7 @@ import { User } from "../types/models/User";
 import { S3Services } from "../services/s3Services";
 import { ChangePasswordRequest } from "../types/auth/ChangePasswordRequest";
 import { validateEnvs } from "../utils/environmentUtils";
+import { logger } from "../utils/loggerUtils";
 
 export const register: Handler = async (
   event: APIGatewayEvent
@@ -89,7 +90,7 @@ export const register: Handler = async (
       "Usuario cadastrado com sucesso, verifique seu email para confirmar o codigo!"
     );
   } catch (error) {
-    console.log("Error on register user:", error);
+    logger.error("Error on register user:", error);
     return formatDefaultResponse(500, "Erro ao cadastrar usuário!");
   }
 };
@@ -128,7 +129,7 @@ export const confirmEmail: Handler = async (
     );
     return formatDefaultResponse(200, "Usuario verificado com sucesso!");
   } catch (error) {
-    console.log("Error on confirm user:", error);
+    logger.error("Error on confirm user:", error);
     return formatDefaultResponse(500, "Erro ao confirmar usuário!");
   }
 };
@@ -165,7 +166,7 @@ export const forgotPassword: Handler = async (
       "Enviamos um email para cadastro de nova senha!"
     );
   } catch (error) {
-    console.log("Error on confirm user:", error);
+    logger.error("Error on confirm user:", error);
     return formatDefaultResponse(
       500,
       "Erro ao solicitar email de esqueci a senha:",
@@ -213,7 +214,7 @@ export const changePassword: Handler = async (
     ).confirmPassword(email, password, verificationCode);
     return formatDefaultResponse(200, result);
   } catch (error) {
-    console.log("Error on confirm user:", error);
+    logger.error("Error on confirm user:", error);
     return formatDefaultResponse(
       500,
       "Erro ao confirmar email do usuário:",

@@ -11,6 +11,7 @@ import { UserModel } from "../models/UserModel";
 import { S3Services } from "../services/s3Services";
 import { FeedLastKeyRequest } from "../types/feed/FeedLastKeyRequest";
 import { DefaultListPaginatedResponse } from "../types/DefaultListPaginatedResponse";
+import { logger } from "../utils/loggerUtils";
 
 export const getByUser: Handler = async (
   event: any
@@ -57,7 +58,7 @@ export const getByUser: Handler = async (
     }
     return formatDefaultResponse(200, null, response);
   } catch (e) {
-    console.log("Error on get user feed: ", e);
+    logger.error("Error on get user feed: ", e);
     return formatDefaultResponse(500, "Erro ao buscar feed do usuário: " + e);
   }
 };
@@ -108,7 +109,7 @@ export const getHome: Handler = async (
     }
     return formatDefaultResponse(200, null, response);
   } catch (e) {
-    console.log("Error on get home feed: ", e);
+    logger.error("Error on get home feed: ", e);
     return formatDefaultResponse(500, "Erro ao buscar feed da home: " + e);
   }
 };

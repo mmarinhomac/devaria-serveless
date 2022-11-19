@@ -14,6 +14,7 @@ import { validateEnvs } from "../utils/environmentUtils";
 import { S3Services } from "../services/s3Services";
 import { PostModel } from "../models/PostModel";
 import { UserModel } from "../models/UserModel";
+import { logger } from "../utils/loggerUtils";
 
 export const create: Handler = async (
   event: APIGatewayEvent
@@ -69,7 +70,7 @@ export const create: Handler = async (
 
     return formatDefaultResponse(200, "Publicação cadastrada com sucesso!");
   } catch (e: any) {
-    console.log("Error on create a postr: ", e);
+    logger.error("Error on create a postr: ", e);
     return formatDefaultResponse(500, "Erro ao cadastrar publicação: " + e);
   }
 };
@@ -113,7 +114,7 @@ export const toggleLike: Handler = async (
       return formatDefaultResponse(200, "Like adicionado com sucesso");
     }
   } catch (e: any) {
-    console.log("Error on toogle like: ", e);
+    logger.error("Error on toogle like: ", e);
     return formatDefaultResponse(
       500,
       "Erro ao curtir/descurtir postagem: " + e
@@ -157,7 +158,7 @@ export const comment: Handler = async (
     await PostModel.update(post);
     return formatDefaultResponse(200, "Comentário adicionado com sucesso");
   } catch (e: any) {
-    console.log("Error on post coment: ", e);
+    logger.error("Error on post coment: ", e);
     return formatDefaultResponse(500, "Erro ao adicionar comentário: " + e);
   }
 };
@@ -184,7 +185,7 @@ export const get: Handler = async (
 
     return formatDefaultResponse(200, null, post);
   } catch (e) {
-    console.log("Error on get user data: ", e);
+    logger.error("Error on get user data: ", e);
     return formatDefaultResponse(500, "Erro ao buscar dados do usuário: " + e);
   }
 };

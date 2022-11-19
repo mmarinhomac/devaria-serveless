@@ -12,6 +12,7 @@ import {
 import { imageAllowedExtensions } from "../constants/regex";
 import { validateEnvs } from "../utils/environmentUtils";
 import { DefaultListPaginatedResponse } from "../types/DefaultListPaginatedResponse";
+import { logger } from "../utils/loggerUtils";
 
 export const me: Handler = async (
   event: APIGatewayEvent
@@ -46,7 +47,7 @@ export const me: Handler = async (
 
     return formatDefaultResponse(200, null, result);
   } catch (e) {
-    console.log("Error on get user data: ", e);
+    logger.error("Error on get user data: ", e);
     return formatDefaultResponse(500, "Erro ao buscar dados do usuário: " + e);
   }
 };
@@ -102,7 +103,7 @@ export const update: Handler = async (
     await UserModel.update(user);
     return formatDefaultResponse(200, "Usuario atualizado com sucesso!");
   } catch (e: any) {
-    console.log("Error on register user: ", e);
+    logger.error("Error on register user: ", e);
     return formatDefaultResponse(500, "Erro ao atualizar usuário: " + e);
   }
 };
@@ -135,7 +136,7 @@ export const getById: Handler = async (
 
     return formatDefaultResponse(200, null, user);
   } catch (e) {
-    console.log("Error on get user data: ", e);
+    logger.error("Error on get user data: ", e);
     return formatDefaultResponse(500, "Erro ao buscar dados do usuário: " + e);
   }
 };
@@ -188,7 +189,7 @@ export const searchUser: Handler = async (
 
     return formatDefaultResponse(200, null, response);
   } catch (e) {
-    console.log("Error on get users: ", e);
+    logger.error("Error on get users: ", e);
     return formatDefaultResponse(500, "Erro ao buscar usuários: " + e);
   }
 };

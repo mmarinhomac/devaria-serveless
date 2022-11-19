@@ -24,6 +24,7 @@ provider:
     POST_TABLE: ${self:custom.postTableName}
     AVATAR_BUCKET: ${self:custom.avatarBucket}
     POST_BUCKET: ${self:custom.postBucket}
+    LOG_LEVEL: ${param:level, 'info'}
   iam:
     role:
       statements:

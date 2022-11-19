@@ -21,6 +21,7 @@
     "aws-multipart-parser": "^0.2.1",
     "dynamoose": "^3.1.0",
     "moment": "^2.29.4",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "winston": "^3.8.2"
   }
 }

@@ -7,6 +7,7 @@ import {
   DefaultJsonResponse,
   formatDefaultResponse,
 } from "../utils/formatResponseUtil";
+import { logger } from "../utils/loggerUtils";
 
 export const handler: Handler = async (
   event: APIGatewayEvent
@@ -18,6 +19,7 @@ export const handler: Handler = async (
     ]);
 
     if (error) {
+      logger.error("login.handler - ", error);
       return formatDefaultResponse(500, error);
     }
 
@@ -32,14 +34,17 @@ export const handler: Handler = async (
       return formatDefaultResponse(400, "Favor informar usuário e senha");
     }
 
+    logger.info("login.handler - start: ", email);
     const response = await new CognitoServices(
       USER_POOL_ID,
       USER_POOL_CLIENT_ID
     ).login(email, password);
+    logger.debug("login.handler - cognito response: ", response);
+    logger.info("login.handler - finish: ", email);
 
     return formatDefaultResponse(200, null, response);
   } catch (e: any) {
-    console.log("Error on login user: ", e);
+    logger.error("login.handler - Error on login user: ", e);
     return formatDefaultResponse(500, "Erro ao aunteticar usuário: " + e);
   }
 };

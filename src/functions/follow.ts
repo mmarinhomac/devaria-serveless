@@ -6,6 +6,7 @@ import {
 import { getUserIdFromEvent } from "../utils/authenticationHandlerUtils";
 import { validateEnvs } from "../utils/environmentUtils";
 import { UserModel } from "../models/UserModel";
+import { logger } from "../utils/loggerUtils";
 
 export const toggle: Handler = async (
   event: any
@@ -62,7 +63,7 @@ export const toggle: Handler = async (
       return formatDefaultResponse(200, "Usuario seguido com sucesso");
     }
   } catch (e: any) {
-    console.log("Error on toogle follow: ", e);
+    logger.error("Error on toogle follow: ", e);
     return formatDefaultResponse(500, "Erro ao seguir/desseguir usuário: " + e);
   }
 };
