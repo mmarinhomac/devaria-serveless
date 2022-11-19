@@ -2,8 +2,8 @@ service: sls-devagram-typescript
 frameworkVersion: '3'
 
 custom:
-  userPoolId: 'us-east-1_HKoQk0hrM'
-  userPoolClientId: '6mt5mecl4i8cji5rshkp8d8icg'
+  userPoolId: !Ref CognitoUserPool
+  userPoolClientId: !Ref CognitoUserPoolClient
   userTableName: 'users-table-${self:provider.stage}'
   postTableName: 'posts-table-${self:provider.stage}'
   avatarBucket: '${self:service}-${self:provider.stage}-devagram-avatars'
